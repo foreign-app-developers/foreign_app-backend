@@ -1,0 +1,16 @@
+
+controllers:
+    resource: ../src/Controller/
+    type: attribute
+
+course_routes:
+    resource: '../src/Controller/CourseController.php'
+    type: annotation
+
+task_routes:
+    resource: '../src/Controller/TaskController.php'
+    type: annotation
+
+user_routes:
+    resource: '../src/Controller/UserController.php'
+    type: annotation
