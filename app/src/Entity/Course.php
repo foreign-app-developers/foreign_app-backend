@@ -39,46 +39,6 @@ class Course
      */
     private ?string $description = null;
 
-    /**
-     * @ORM\OneToMany(targetEntity="Material", mappedBy="course")
-     */
-    private $materials;
-
-    /**
-     * @ORM\OneToMany(targetEntity="UserCourse", mappedBy="course")
-     */
-    private $userCourses;
-
-    /**
-     * @ORM\OneToMany(targetEntity="Task", mappedBy="course")
-     */
-    private $tasks;
-    public function __construct()
-    {
-        $this->materials = new ArrayCollection();
-        $this->userCourses = new ArrayCollection();
-        $this->tasks = new ArrayCollection();
-    }
-
-    public function getMaterials()
-    {
-        return $this->materials;
-    }
-
-    public function addMaterial(Material $material)
-    {
-        $this->materials[] = $material;
-        $material->setCourse($this);
-    }
-
-    public function removeMaterial(Material $material)
-    {
-        $this->materials->removeElement($material);
-        $material->setCourse(null);
-    }
-
-
-
     public function getCreatedBy(): ?int
     {
         return $this->created_by;

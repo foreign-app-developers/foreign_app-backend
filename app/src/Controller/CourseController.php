@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Course;
-
+use Symfony\Component\HttpClient\CurlHttpClient;
 use App\Entity\Task;
 use App\Entity\User;
 use App\Repository\CourseRepository;
@@ -13,6 +13,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Finder\Exception\AccessDeniedException;
+use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -28,24 +29,34 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 class CourseController extends AbstractController
 {
 
-
-    public function getAllCourses(): JsonResponse
+    /**
+     * @Route("/courses", name="get_courses", methods={"GET"})
+     */
+    public function getAllCourses(CourseRepository $repo): JsonResponse
     {
 
-
-        $courses = $this->getDoctrine()->getRepository(Course::class)->findAll();
-
+        $courses = $repo->findAll();
         return $this->json($courses);
+
     }
     /**
      * @Route("/course/add", name="add_course", methods={"POST"})
      */
     public function addCourse(Request $request, CourseRepository $repo):JsonResponse
     {
-        if (!$this->isGranted('ROLE_TEACHER')) {
-            throw new AccessDeniedException('Доступ запрещен, требуется ROLE_TEACHER');
-        }
         $data = json_decode($request->getContent(), true);
+
+        $client = HttpClient::create();
+        $headers = [
+            'YT-AUTH-TOKEN' => "YourTar " . $data['token']
+        ];
+        $response = $client->request('GET', 'https://back.yourtar.ru/api/user/?with_project=1', [
+            'headers' => $headers,
+        ]);
+        $usrData = json_decode($response->getContent(), true);
+        if (!((in_array('ROLE_TEACHER' , $usrData['data']['roles'])) or (in_array('ROLE_DIRECTOR' , $usrData['data']['roles']))))  {
+            throw new AccessDeniedException('Доступ запрещен, требуется роль учителя или директора');
+        }
         // Создание экземпляра сущности Course
         $course = new Course();
         $course->setName($data['name']);
@@ -72,6 +83,18 @@ class CourseController extends AbstractController
             throw new AccessDeniedException('Доступ запрещен, требуется ROLE_TEACHER');
         }
         $data = json_decode($request->getContent(), true);
+
+        $client = HttpClient::create();
+        $headers = [
+            'YT-AUTH-TOKEN' => "YourTar " . $data['token']
+        ];
+        $response = $client->request('GET', 'https://back.yourtar.ru/api/user/?with_project=1', [
+            'headers' => $headers,
+        ]);
+        $usrData = json_decode($response->getContent(), true);
+        if (!((in_array('ROLE_TEACHER' , $usrData['data']['roles'])) or (in_array('ROLE_DIRECTOR' , $usrData['data']['roles']))))  {
+            throw new AccessDeniedException('Доступ запрещен, требуется роль учителя или директора');
+        }
 
         if (!array_key_exists('id', $data)) return $this->json([
             'message' => 'Вы не передали id',
@@ -113,10 +136,19 @@ class CourseController extends AbstractController
     /**
      * @Route("/course/{id}", name="delete_course", methods={"DELETE"})
      */
-    public function deleteCourse(int $id,CourseRepository $repo, #[CurrentUser] User $user): JsonResponse
+    public function deleteCourse(int $id,CourseRepository $repo, Request $request): JsonResponse
     {
-        if (!($user->isDirector())) {
-            throw new AccessDeniedException('Доступ запрещен, требуется ROLE_DIRECTOR');
+        $data = json_decode($request->getContent(), true);
+        $client = HttpClient::create();
+        $headers = [
+            'YT-AUTH-TOKEN' => "YourTar " . $data['token']
+        ];
+        $response = $client->request('GET', 'https://back.yourtar.ru/api/user/?with_project=1', [
+            'headers' => $headers,
+        ]);
+        $usrData = json_decode($response->getContent(), true);
+        if (!((in_array('ROLE_TEACHER' , $usrData['data']['roles'])) or (in_array('ROLE_DIRECTOR' , $usrData['data']['roles']))))  {
+            throw new AccessDeniedException('Доступ запрещен, требуется роль учителя или директора');
         }
         //ищем курс в репозитории по id
         $course = $repo->find($id);
