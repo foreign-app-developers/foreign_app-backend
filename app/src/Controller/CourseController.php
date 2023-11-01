@@ -155,8 +155,9 @@ class CourseController extends AbstractController
     /**
      * @Route("/student-courses", name="student_courses", methods={"GET"})
      */
-    public function getStudentCourses( CourseForUserRepository $courseForUserRepository, Request $request)
+    public function getStudentCourses( CourseForUserRepository $courseForUserRepository, Request $request, CourseRepository $repo)
     {
+
         $authorizationHeader = $request-> headers->get('Authorization');
 
         if (!$authorizationHeader) {
@@ -169,23 +170,28 @@ class CourseController extends AbstractController
         $response = $client->request('GET', 'https://back.yourtar.ru/api/user/?with_project=1', [
             'headers' => $headers,
         ]);
+
         $usrData = json_decode($response->getContent(), true);
         $id = $usrData['data']['id'];
 
         $studentCourses = $courseForUserRepository->findCoursesForStudent($id);
         $coursesData = [];
-        foreach ($studentCourses as $courseForUser) {
-            $course = $courseForUser->getCourse();
-            $coursesData[] = [
-                'id' => $course->getId(),
-                'created_by' => $course->getCreatedBy(),
-                'name' => $course->getName(),
-                'description' => $course->getDescription(),
-                'status' => $course->getStatus(),
-            ];
+
+        if ($studentCourses !== null) {
+            foreach ($studentCourses as $courseForUser) {
+                $course = $repo ->find($courseForUser->getCourseId());
+                $coursesData[] = [
+                    'id' => $course->getId(),
+                    'created_by' => $course->getCreatedBy(),
+                    'name' => $course->getName(),
+                    'description' => $course->getDescription(),
+                    'status' => $course->getStatus(),
+                ];
+            }
         }
 
         return $this->json(['data' => $coursesData]);
+
     }
 
     /**

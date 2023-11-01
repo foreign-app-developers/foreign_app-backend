@@ -59,11 +59,11 @@ class CourseForUserRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findCoursesForStudent(int $user_id)
+    public function findCoursesForStudent(int $id)
     {
         return $this->createQueryBuilder('cfu')
-            ->where('cfu.user_id = :userId')
-            ->setParameter('user', $user_id)
+            ->where('cfu.user_id = :user_id')
+            ->setParameter('user_id', $id)
             ->getQuery()
             ->getResult();
     }
