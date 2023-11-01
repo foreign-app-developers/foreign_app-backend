@@ -3,9 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\Course;
+use App\Repository\CourseForUserRepository;
+use App\Entity\CourseForUser;
 use Symfony\Component\HttpClient\CurlHttpClient;
 use App\Entity\Task;
-use App\Entity\User;
 use App\Repository\CourseRepository;
 use App\Repository\TaskRepository;
 use App\Repository\UserRepository;
@@ -19,8 +20,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\Persistence\ManagerRegistry as PersistenceManagerRegistry;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Http\Attribute\CurrentUser;
+use Doctrine\Persistence\ManagerRegistry;
 
 
 /**
@@ -133,6 +133,91 @@ class CourseController extends AbstractController
 
         return $this->json($course);
     }
+    /**
+     * @Route("/course_by/{id}", name="get_courses_for_student", methods={"GET"})
+     */
+    public function getCoursesForStudent(int $id, CourseRepository $repo): JsonResponse
+    {
+        $courses = $repo->findBy(['created_by' => $id]);
+
+        $courseData = [];
+        foreach ($courses as $course) {
+            $courseData[] = [
+                'id' => $course->getId(),
+                'name' => $course->getName(),
+                'status' => $course->getStatus()
+            ];
+        }
+
+        return $this->json($courseData);
+    }
+
+    /**
+     * @Route("/student-courses", name="student_courses", methods={"GET"})
+     */
+    public function getStudentCourses( CourseForUserRepository $courseForUserRepository, Request $request)
+    {
+        $authorizationHeader = $request-> headers->get('Authorization');
+
+        if (!$authorizationHeader) {
+            throw new AccessDeniedException('Заголовок Authorization не предоставлен');
+        }
+        $client = HttpClient::create();
+        $headers = [
+            'YT-AUTH-TOKEN' => "YourTar " . $authorizationHeader
+        ];
+        $response = $client->request('GET', 'https://back.yourtar.ru/api/user/?with_project=1', [
+            'headers' => $headers,
+        ]);
+        $usrData = json_decode($response->getContent(), true);
+        $id = $usrData['data']['id'];
+
+        $studentCourses = $courseForUserRepository->findCoursesForStudent($id);
+        $coursesData = [];
+        foreach ($studentCourses as $courseForUser) {
+            $course = $courseForUser->getCourse();
+            $coursesData[] = [
+                'id' => $course->getId(),
+                'created_by' => $course->getCreatedBy(),
+                'name' => $course->getName(),
+                'description' => $course->getDescription(),
+                'status' => $course->getStatus(),
+            ];
+        }
+
+        return $this->json(['data' => $coursesData]);
+    }
+
+    /**
+     * @Route("/assign-course/{courseId}/{userId}", name="assign_course_to_student", methods={"POST"})
+     */
+    public function assignCourseToStudent(int $courseId, int $userId, CourseRepository $courseRepository, UserRepository $userRepository, CourseForUserRepository $courseForUserRepository,Request $request): JsonResponse
+    {
+
+        $course = $courseRepository->find($courseId);
+        $student = $userRepository->find($userId);
+
+        if (!$course) {
+            return new JsonResponse(['message' => 'Курс не найден'], 404);
+        }
+
+        if (!$student) {
+            return new JsonResponse(['message' => 'Студент не найден'], 404);
+        }
+
+        $courseForUser = new CourseForUser();
+        $courseForUser->setCourseId($courseId);
+        $courseForUser->setUserId($userId);
+
+        $courseForUserRepository->save($courseForUser, true);
+
+        //возвращаем ответ в формате json
+        return $this->json([
+            'data' => $courseForUser,
+            'message' => 'Курс успешно назначен!',
+        ]);
+    }
+
     /**
      * @Route("/course/{id}", name="delete_course", methods={"DELETE"})
      */

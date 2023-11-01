@@ -45,5 +45,27 @@ class UserController extends AbstractController
         return $this->json($user);
     }
 
+    /**
+     * @Route("/user/add", name="add_user", methods={"POST"})
+     */
+    public function addUser(Request $request, UserRepository $userRepository): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        $user = new User();
+        $user->setUsername($data['username']);
+        $user->setEmail($data['email']);
+        $user->setPassword($data['password']);
+        // Другие свойства пользователя
+
+        $userRepository->save($user, true);
+
+        // Возвращаем ответ в формате JSON
+        return $this->json([
+            'data' => $user,
+            'message' => 'Пользователь успешно создан!',
+        ]);
+    }
+
     // Другие методы для создания, обновления и удаления пользователей...
 }
