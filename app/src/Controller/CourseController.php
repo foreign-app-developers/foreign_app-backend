@@ -172,6 +172,9 @@ class CourseController extends AbstractController
         ]);
 
         $usrData = json_decode($response->getContent(), true);
+        if (!((in_array('ROLE_TEACHER' , $usrData['data']['roles'])) or (in_array('ROLE_DIRECTOR' , $usrData['data']['roles']))))  {
+            throw new AccessDeniedException('Доступ запрещен, требуется роль учителя или директора');
+        }
         $id = $usrData['data']['id'];
 
         $studentCourses = $courseForUserRepository->findCoursesForStudent($id);
