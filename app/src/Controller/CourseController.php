@@ -145,7 +145,8 @@ class CourseController extends AbstractController
             $courseData[] = [
                 'id' => $course->getId(),
                 'name' => $course->getName(),
-                'status' => $course->getStatus()
+                'status' => $course->getStatus(),
+                'description' => $course ->getDescription()
             ];
         }
 
@@ -172,9 +173,6 @@ class CourseController extends AbstractController
         ]);
 
         $usrData = json_decode($response->getContent(), true);
-        if (!((in_array('ROLE_TEACHER' , $usrData['data']['roles'])) or (in_array('ROLE_DIRECTOR' , $usrData['data']['roles']))))  {
-            throw new AccessDeniedException('Доступ запрещен, требуется роль учителя или директора');
-        }
 
         $id = $usrData['data']['id'];
         $studentCourses = $courseForUserRepository->findCoursesForStudent($id);
@@ -202,7 +200,7 @@ class CourseController extends AbstractController
      */
     public function assignCourseToStudent(int $courseId, int $userId, CourseRepository $courseRepository, UserRepository $userRepository, CourseForUserRepository $courseForUserRepository,Request $request): JsonResponse
     {
-
+        //Добавить получение id пользователя от фронта
         $course = $courseRepository->find($courseId);
         $student = $userRepository->find($userId);
 
