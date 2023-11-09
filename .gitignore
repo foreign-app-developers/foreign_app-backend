@@ -1,4 +1,4 @@
-.idea
+/.idea
 /docker/db
 /docker/logs
 
