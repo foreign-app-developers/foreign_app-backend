@@ -45,10 +45,16 @@ class CourseController extends AbstractController
     public function addCourse(Request $request, CourseRepository $repo):JsonResponse
     {
         $data = json_decode($request->getContent(), true);
+        // Извлекаем заголовок "Authorization"
+        $authorizationHeader = $request->headers->get('Authorization');
 
+        // Проверяем, существует ли заголовок
+        if (!$authorizationHeader) {
+            throw new AccessDeniedHttpException('Заголовок Authorization не предоставлен');
+        }
         $client = HttpClient::create();
         $headers = [
-            'YT-AUTH-TOKEN' => "YourTar " . $data['token']
+            'YT-AUTH-TOKEN' => "YourTar " . $authorizationHeader
         ];
         $response = $client->request('GET', 'https://back.yourtar.ru/api/user/?with_project=1', [
             'headers' => $headers,
@@ -79,14 +85,17 @@ class CourseController extends AbstractController
      */
     public function editCourse(CourseRepository $repo, Request $request): JsonResponse
     {
-        if (!$this->isGranted('ROLE_TEACHER')) {
-            throw new AccessDeniedException('Доступ запрещен, требуется ROLE_TEACHER');
-        }
         $data = json_decode($request->getContent(), true);
+        // Извлекаем заголовок "Authorization"
+        $authorizationHeader = $request->headers->get('Authorization');
 
+        // Проверяем, существует ли заголовок
+        if (!$authorizationHeader) {
+            throw new AccessDeniedHttpException('Заголовок Authorization не предоставлен');
+        }
         $client = HttpClient::create();
         $headers = [
-            'YT-AUTH-TOKEN' => "YourTar " . $data['token']
+            'YT-AUTH-TOKEN' => "YourTar " . $authorizationHeader
         ];
         $response = $client->request('GET', 'https://back.yourtar.ru/api/user/?with_project=1', [
             'headers' => $headers,
@@ -231,9 +240,16 @@ class CourseController extends AbstractController
     public function deleteCourse(int $id,CourseRepository $repo, Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
+        // Извлекаем заголовок "Authorization"
+        $authorizationHeader = $request->headers->get('Authorization');
+
+        // Проверяем, существует ли заголовок
+        if (!$authorizationHeader) {
+            throw new AccessDeniedHttpException('Заголовок Authorization не предоставлен');
+        }
         $client = HttpClient::create();
         $headers = [
-            'YT-AUTH-TOKEN' => "YourTar " . $data['token']
+            'YT-AUTH-TOKEN' => "YourTar " . $authorizationHeader
         ];
         $response = $client->request('GET', 'https://back.yourtar.ru/api/user/?with_project=1', [
             'headers' => $headers,
