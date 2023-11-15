@@ -248,7 +248,6 @@ class CourseController extends AbstractController
      */
     public function deleteCourse(int $id,CourseRepository $repo, Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
         // Извлекаем заголовок "Authorization"
         $authorizationHeader = $request->headers->get('Authorization');
 

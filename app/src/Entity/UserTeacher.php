@@ -11,38 +11,53 @@ use Doctrine\ORM\Mapping as ORM;
 class UserTeacher
 {
     /**
-     * @ORM\Id()
-     * @ORM\ManyToOne(targetEntity="User", inversedBy="userTeacher")
-     * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
+     * @ORM\Column(type="integer")
      */
-    private $user;
+    private $user_id;
 
     /**
-     * @ORM\Id()
-     * @ORM\ManyToOne(targetEntity="User", inversedBy="teacherUser")
-     * @ORM\JoinColumn(name="teacher_id", referencedColumnName="id")
+     * @ORM\Column(type="boolean", options={"default" : 0})
      */
-    private $teacher;
+    private $accept;
 
-    // Add any additional properties and methods relevant to UserTeacher entity
+    /**
+     * @ORM\Id
+     * @ORM\Column(type="integer")
+     */
+    private $teacher_id;
 
-    public function getUser()
+    public function getUserId(): ?int
     {
-        return $this->user;
+        return $this->user_id;
     }
 
-    public function setUser($user)
+    public function setUserId(int $user_id): self
     {
-        $this->user = $user;
+        $this->user_id = $user_id;
+
+        return $this;
+    }
+    public function getAccept(): ?bool
+    {
+        return $this->accept;
     }
 
-    public function getTeacher()
+    public function setAccept(bool $accept): self
     {
-        return $this->teacher;
+        $this->accept = $accept;
+
+        return $this;
     }
 
-    public function setTeacher($teacher)
+    public function getTeacherId(): ?int
     {
-        $this->teacher = $teacher;
+        return $this->teacher_id;
+    }
+
+    public function setTeacherId(int $teacher_id): self
+    {
+        $this->teacher_id = $teacher_id;
+
+        return $this;
     }
 }
