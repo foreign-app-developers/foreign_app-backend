@@ -27,6 +27,12 @@ class CourseForUser
      */
     private $course_id;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Course::class, inversedBy="courseForUsers")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $course;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -52,6 +58,18 @@ class CourseForUser
     public function setCourseId(int $course_id): self
     {
         $this->course_id = $course_id;
+
+        return $this;
+    }
+
+    public function getCourse(): ?Course
+    {
+        return $this->course;
+    }
+
+    public function setCourse(?Course $course): self
+    {
+        $this->course = $course;
 
         return $this;
     }

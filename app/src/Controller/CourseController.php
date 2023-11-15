@@ -13,7 +13,6 @@ use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -36,7 +35,10 @@ class CourseController extends AbstractController
     {
 
         $courses = $repo->findAll();
-        return $this->json($courses);
+        return $this->json([
+           'data' => $courses,
+           'massage' => 'Все курсы успешно получены!',
+        ]);
 
     }
     /**
@@ -50,7 +52,9 @@ class CourseController extends AbstractController
 
         // Проверяем, существует ли заголовок
         if (!$authorizationHeader) {
-            throw new AccessDeniedHttpException('Заголовок Authorization не предоставлен');
+             return $this->json([
+                'message' => 'Заголовок Authorization не предоставлен',
+            ], 401);
         }
         $client = HttpClient::create();
         $headers = [
@@ -61,13 +65,15 @@ class CourseController extends AbstractController
         ]);
         $usrData = json_decode($response->getContent(), true);
         if (!((in_array('ROLE_TEACHER' , $usrData['data']['roles'])) or (in_array('ROLE_DIRECTOR' , $usrData['data']['roles']))))  {
-            throw new AccessDeniedException('Доступ запрещен, требуется роль учителя или директора');
+            return $this->json([
+                'message' => 'Доступ запрещен, требуется роль учителя или директора',
+            ], 403);
         }
         // Создание экземпляра сущности Course
         $course = new Course();
         $course->setName($data['name']);
         $course->setDescription($data['description']);
-        $course->setCreatedBy($data['createdBy']);
+        $course->setAuthorId($usrData['data']['id']);
         $course->setStatus("on_consider");
 
         $repo->save($course, True);
@@ -91,7 +97,9 @@ class CourseController extends AbstractController
 
         // Проверяем, существует ли заголовок
         if (!$authorizationHeader) {
-            throw new AccessDeniedHttpException('Заголовок Authorization не предоставлен');
+            return $this->json([
+                'message' => 'Заголовок Authorization не предоставлен',
+            ], 401);
         }
         $client = HttpClient::create();
         $headers = [
@@ -102,7 +110,9 @@ class CourseController extends AbstractController
         ]);
         $usrData = json_decode($response->getContent(), true);
         if (!((in_array('ROLE_TEACHER' , $usrData['data']['roles'])) or (in_array('ROLE_DIRECTOR' , $usrData['data']['roles']))))  {
-            throw new AccessDeniedException('Доступ запрещен, требуется роль учителя или директора');
+            return $this->json([
+                'message' => 'Доступ запрещен, требуется роль учителя или директора',
+            ], 403);
         }
 
         if (!array_key_exists('id', $data)) return $this->json([
@@ -140,26 +150,21 @@ class CourseController extends AbstractController
             ], 404);
         }
 
-        return $this->json($course);
+        return $this->json([
+            'data'=> $course,
+            'massage' => 'Курс успешно получен!',
+        ]);
     }
     /**
-     * @Route("/course_by/{id}", name="get_courses_for_student", methods={"GET"})
+     * @Route("/author_id/{id}", name="get_courses_from_teacher", methods={"GET"})
      */
-    public function getCoursesForStudent(int $id, CourseRepository $repo): JsonResponse
+    public function getCoursesFromTeacher(int $id, CourseRepository $repo): JsonResponse
     {
-        $courses = $repo->findBy(['created_by' => $id]);
-
-        $courseData = [];
-        foreach ($courses as $course) {
-            $courseData[] = [
-                'id' => $course->getId(),
-                'name' => $course->getName(),
-                'status' => $course->getStatus(),
-                'description' => $course ->getDescription()
-            ];
-        }
-
-        return $this->json($courseData);
+        $courses = $repo->findBy(['author_id' => $id]);
+        return $this->json([
+           'data'=> $courses,
+           'massage'=> 'Курсы преподавателя получены!'
+        ]);
     }
 
     /**
@@ -171,7 +176,9 @@ class CourseController extends AbstractController
         $authorizationHeader = $request-> headers->get('Authorization');
 
         if (!$authorizationHeader) {
-            throw new AccessDeniedException('Заголовок Authorization не предоставлен');
+            return $this->json([
+                'message' => 'Заголовок Authorization не предоставлен',
+            ], 401);
         }
         $client = HttpClient::create();
         $headers = [
@@ -189,10 +196,10 @@ class CourseController extends AbstractController
 
         if ($studentCourses !== null) {
             foreach ($studentCourses as $courseForUser) {
-                $course = $repo ->find($courseForUser->getCourseId());
+                $course = $repo ->find($courseForUser->getCourse());
                 $coursesData[] = [
                     'id' => $course->getId(),
-                    'created_by' => $course->getCreatedBy(),
+                    'author_id' => $course->getAuthorId(),
                     'name' => $course->getName(),
                     'description' => $course->getDescription(),
                     'status' => $course->getStatus(),
@@ -200,7 +207,10 @@ class CourseController extends AbstractController
             }
         }
 
-        return $this->json(['data' => $coursesData]);
+        return $this->json([
+            'data' => $coursesData,
+            'massage'=>'Курсы для этого студента получены!',
+        ]);
 
     }
 
@@ -211,18 +221,17 @@ class CourseController extends AbstractController
     {
         //Добавить получение id пользователя от фронта
         $course = $courseRepository->find($courseId);
-        $student = $userRepository->find($userId);
 
         if (!$course) {
             return new JsonResponse(['message' => 'Курс не найден'], 404);
         }
 
-        if (!$student) {
-            return new JsonResponse(['message' => 'Студент не найден'], 404);
-        }
+//        if (!$student) {
+//            return new JsonResponse(['message' => 'Студент не найден'], 404);
+//        }
 
         $courseForUser = new CourseForUser();
-        $courseForUser->setCourseId($courseId);
+        $courseForUser->setCourse($course);
         $courseForUser->setUserId($userId);
 
         $courseForUserRepository->save($courseForUser, true);
@@ -245,7 +254,9 @@ class CourseController extends AbstractController
 
         // Проверяем, существует ли заголовок
         if (!$authorizationHeader) {
-            throw new AccessDeniedHttpException('Заголовок Authorization не предоставлен');
+            return $this->json([
+                'message' => 'Заголовок Authorization не предоставлен',
+            ], 401);
         }
         $client = HttpClient::create();
         $headers = [
@@ -256,7 +267,9 @@ class CourseController extends AbstractController
         ]);
         $usrData = json_decode($response->getContent(), true);
         if (!((in_array('ROLE_TEACHER' , $usrData['data']['roles'])) or (in_array('ROLE_DIRECTOR' , $usrData['data']['roles']))))  {
-            throw new AccessDeniedException('Доступ запрещен, требуется роль учителя или директора');
+            return $this->json([
+                'message' => 'Доступ запрещен, требуется роль учителя или директора',
+            ], 403);
         }
         //ищем курс в репозитории по id
         $course = $repo->find($id);
