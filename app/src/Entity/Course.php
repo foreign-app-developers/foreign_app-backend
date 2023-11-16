@@ -4,12 +4,14 @@ namespace App\Entity;
 
 use App\Repository\CourseRepository;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass=CourseRepository::class)
  * @ORM\Table(name="courses")
  */
+
 class Course
 {
     /**
@@ -22,7 +24,7 @@ class Course
     /**
      * @ORM\Column(type="integer")
      */
-    private ?int $created_by = null;
+    private ?int $author_id = null;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -39,14 +41,23 @@ class Course
      */
     private ?string $description = null;
 
-    public function getCreatedBy(): ?int
+    /**
+     * @ORM\OneToMany(targetEntity=CourseForUser::class, mappedBy="course")
+     */
+    private $courseForUsers;
+    public function __construct()
     {
-        return $this->created_by;
+        $this->courseForUsers = new ArrayCollection();
     }
 
-    public function setCreatedBy(int $created_by): self
+    public function getAuthorId(): ?int
     {
-        $this->created_by = $created_by;
+        return $this->author_id;
+    }
+
+    public function setAuthorId(int $author_id): self
+    {
+        $this->author_id = $author_id;
 
         return $this;
     }
@@ -91,5 +102,36 @@ class Course
 
         return $this;
     }
+    /**
+     * @return Collection|CourseForUser[]
+     */
+    public function getCourseForUsers(): Collection
+    {
+        /** @var Collection|CourseForUser[] $collection */
+        $collection = $this->courseForUsers;
+        return $collection;
+    }
 
+
+    public function addCourseForUser(CourseForUser $courseForUser): self
+    {
+        if (!$this->courseForUsers->contains($courseForUser)) {
+            $this->courseForUsers[] = $courseForUser;
+            $courseForUser->setCourse($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCourseForUser(CourseForUser $courseForUser): self
+    {
+        if ($this->courseForUsers->removeElement($courseForUser)) {
+            // set the owning side to null (unless already changed)
+            if ($courseForUser->getCourse() === $this) {
+                $courseForUser->setCourse(null);
+            }
+        }
+
+        return $this;
+    }
 }
