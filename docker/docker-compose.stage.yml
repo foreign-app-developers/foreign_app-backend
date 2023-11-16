@@ -23,7 +23,7 @@ services:
     container_name: nginx_foreign
     image: nginx:latest
     restart: on-failure
-    ports:
+    expose:
       - "8000:80"
     volumes:
       - ../app:/var/www/html
