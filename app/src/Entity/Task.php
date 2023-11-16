@@ -46,15 +46,6 @@ class Task
      */
     private $course;
 
-    /**
-     * @ORM\ManyToMany(targetEntity="User", mappedBy="tasks")
-     */
-    private $users;
-
-    public function __construct()
-    {
-        $this->users = new ArrayCollection();
-    }
 
     /**
      *
@@ -64,5 +55,16 @@ class Task
     public function checkAnswers(array $givenAnswers)
     {
         // проверка ответов
+    }
+    public function getCourse(): ?Course
+    {
+        return $this->course;
+    }
+
+    public function setCourse(?Course $course): self
+    {
+        $this->course = $course;
+
+        return $this;
     }
 }

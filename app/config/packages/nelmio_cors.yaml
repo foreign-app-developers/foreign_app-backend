@@ -1,0 +1,6 @@
+# config/packages/nelmio_cors.yaml
+nelmio_cors:
+  defaults:
+    allow_origin: ['*']
+    allow_methods: ['GET', 'OPTIONS', 'POST', 'PUT', 'DELETE']
+    allow_headers: ['Content-Type', 'Authorization']

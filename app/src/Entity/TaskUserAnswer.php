@@ -19,19 +19,29 @@ class TaskUserAnswer
     private $task;
 
     /**
-     * @ORM\Id
-     * @ORM\ManyToOne(targetEntity="User", inversedBy="taskUserAnswers")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\Column(type="integer")
      */
-    private $user;
+    private $user_id;
 
     /**
-     * @ORM\Column(type="json")
+     * @ORM\Column(type="text")
      */
     private $answer;
     public function getTask()
     {
         return $this->task;
+    }
+
+    public function getUserId(): ?int
+    {
+        return $this->user_id;
+    }
+
+    public function setUserId(int $user_id): self
+    {
+        $this->user_id = $user_id;
+
+        return $this;
     }
 
     public function setTask($task)
