@@ -1,0 +1,44 @@
+version:  '3.7'
+
+networks:
+  demo:
+    external: true
+
+services:
+  php_foreign:
+    container_name: php_foreign
+    build:
+      context: dockerfile/php
+      dockerfile: Dockerfile.stage
+    restart: on-failure
+    volumes:
+      - ../app:/var/www/html
+      - ../app/vendor:/var/www/html/vendor
+    expose:
+      - "9000"
+    links:
+      - mysql_foreign
+
+  nginx_foreign:
+    container_name: nginx_foreign
+    image: nginx:latest
+    restart: on-failure
+    ports:
+      - "8000:80"
+    volumes:
+      - ../app:/var/www/html
+      - ./logs/nginx:/var/log/nginx
+      - ./config/nginx:/etc/nginx/conf.d
+    links:
+      - php_foreign
+
+  mysql_foreign:
+    container_name: mysql_foreign
+    image: mysql:8
+    restart: on-failure
+    expose:
+      - "3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ./db:/var/lib/mysql
