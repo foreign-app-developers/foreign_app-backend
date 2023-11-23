@@ -1,0 +1,22 @@
+nelmio_api_doc:
+  documentation:
+    servers:
+      - url: http://localhost:8000
+        description: API over HTTP
+      - url: https://example.com
+        description: API over HTTPS
+    info:
+      title: My App
+      description: This is an awesome app!
+      version: 1.0.0
+    components:
+      securitySchemes:
+        Bearer:
+          type: http
+          scheme: bearer
+          bearerFormat: JWT
+    security:
+      - Bearer: []
+  areas:
+    path_patterns: # an array of regexps (document only routes under /api, except /api/doc)
+      - ^/api(?!/doc$)

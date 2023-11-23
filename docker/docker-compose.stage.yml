@@ -18,12 +18,14 @@ services:
       - "9000"
     links:
       - mysql_foreign
+    networks:
+      - demo
 
   nginx_foreign:
     container_name: nginx_foreign
     image: nginx:latest
     restart: on-failure
-    ports:
+    expose:
       - "8000:80"
     volumes:
       - ../app:/var/www/html
@@ -31,6 +33,8 @@ services:
       - ./config/nginx:/etc/nginx/conf.d
     links:
       - php_foreign
+    networks:
+      - demo
 
   mysql_foreign:
     container_name: mysql_foreign
@@ -42,3 +46,5 @@ services:
       MYSQL_ROOT_PASSWORD: root
     volumes:
       - ./db:/var/lib/mysql
+    networks:
+      - demo
