@@ -26,7 +26,7 @@ services:
     image: nginx:latest
     restart: on-failure
     expose:
-      - "8000:80"
+      - "80"
     volumes:
       - ../app:/var/www/html
       - ./logs/nginx:/var/log/nginx
