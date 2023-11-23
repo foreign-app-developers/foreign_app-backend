@@ -1,10 +1,10 @@
 nelmio_api_doc:
   documentation:
     servers:
+      - url: https://back.lang.yourtar.ru
+        description: API over HTTPS
       - url: http://localhost:8000
         description: API over HTTP
-      - url: https://example.com
-        description: API over HTTPS
     info:
       title: My App
       description: This is an awesome app!
