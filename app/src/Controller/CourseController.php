@@ -215,10 +215,13 @@ class CourseController extends AbstractController
     }
 
     /**
-     * @Route("/assign-course/{courseId}/{userId}", name="assign_course_to_student", methods={"POST"})
+     * @Route("/assign-course", name="assign_course_to_student", methods={"POST"})
      */
-    public function assignCourseToStudent(int $courseId, int $userId, CourseRepository $courseRepository, UserRepository $userRepository, CourseForUserRepository $courseForUserRepository,Request $request): JsonResponse
+    public function assignCourseToStudent(CourseRepository $courseRepository, UserRepository $userRepository, CourseForUserRepository $courseForUserRepository,Request $request): JsonResponse
     {
+        $data = json_decode($request->getContent(), true);
+        $courseId  = $data['courseId'];
+        $userId = $data['userId'];
         //Добавить получение id пользователя от фронта
         $course = $courseRepository->find($courseId);
 
