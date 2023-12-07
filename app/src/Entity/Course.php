@@ -42,7 +42,7 @@ class Course
     private ?string $description = null;
 
     /**
-     * @ORM\OneToMany(targetEntity=CourseForUser::class, mappedBy="course")
+     * @ORM\OneToMany(targetEntity=CourseForUser::class, mappedBy="course", cascade={"remove"})
      */
     private $courseForUsers;
     public function __construct()

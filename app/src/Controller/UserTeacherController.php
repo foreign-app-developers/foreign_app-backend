@@ -13,12 +13,19 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\UserTeacher;
 use App\Entity\User;
+use Symfony\Component\Serializer\SerializerInterface;
 
 /**
  * @Route("/api")
  */
 class UserTeacherController extends AbstractController
 {
+    private $serializer;
+
+    public function __construct( SerializerInterface $serializer)
+    {
+        $this->serializer = $serializer;
+    }
     /**
      * @Route("/invite", name="send invite", methods={"POST"})
      */
@@ -56,7 +63,7 @@ class UserTeacherController extends AbstractController
 
         //возвращаем ответ в формате json
         return $this->json([
-            'data' => $invent,
+            'data' => $this->serializer->normalize($invent),
             'message' => 'Приглашение успешно создано!',
         ]);
     }
@@ -96,7 +103,7 @@ class UserTeacherController extends AbstractController
             }
         }
         return $this->json([
-            'data'=> $acceptedStudents,
+            'data'=> $this->serializer->normalize($acceptedStudents),
             'massage'=> 'Студенты получены!'
         ]);
     }
@@ -132,7 +139,7 @@ class UserTeacherController extends AbstractController
             }
         }
         return $this->json([
-            'data'=> $acceptedteachers,
+            'data'=> $this->serializer->normalize($acceptedteachers),
             'massage'=> 'Преподаватели получены!'
         ]);
     }

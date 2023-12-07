@@ -20,13 +20,21 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\Persistence\ManagerRegistry as PersistenceManagerRegistry;
 use Doctrine\Persistence\ManagerRegistry;
-
+use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Serializer\Serializer;
 
 /**
  * @Route("/api")
  */
 class CourseController extends AbstractController
 {
+    private $serializer;
+
+    public function __construct( SerializerInterface $serializer)
+    {
+        $this->serializer = $serializer;
+    }
+
 
     /**
      * @Route("/courses", name="get_courses", methods={"GET"})
@@ -35,8 +43,9 @@ class CourseController extends AbstractController
     {
 
         $courses = $repo->findAll();
+
         return $this->json([
-           'data' => $courses,
+           'data' => $this->serializer->normalize($courses),
            'massage' => 'Все курсы успешно получены!',
         ]);
 
@@ -68,7 +77,7 @@ class CourseController extends AbstractController
             return $this->json([
                 'message' => 'Доступ запрещен, требуется роль учителя или директора',
             ], 403);
-        }
+        } //пределать
         // Создание экземпляра сущности Course
         $course = new Course();
         $course->setName($data['name']);
@@ -80,7 +89,7 @@ class CourseController extends AbstractController
 
         //возвращаем ответ в формате json
         return $this->json([
-            'data' => $course,
+            'data' => $this->serializer->normalize($course),
             'message' => 'Курс успешно создан!',
         ]);
 
@@ -133,7 +142,7 @@ class CourseController extends AbstractController
         $repo->save($course, true);
 
         return $this->json([
-            'data' => $course,
+            'data' => $this->serializer->normalize($course),
             'message' => 'Курс успешно обновлён!',
         ]);
     }
@@ -151,7 +160,7 @@ class CourseController extends AbstractController
         }
 
         return $this->json([
-            'data'=> $course,
+            'data'=> $this->serializer->normalize($course),
             'massage' => 'Курс успешно получен!',
         ]);
     }
@@ -162,7 +171,7 @@ class CourseController extends AbstractController
     {
         $courses = $repo->findBy(['author_id' => $id]);
         return $this->json([
-           'data'=> $courses,
+           'data'=> $this->serializer->normalize($courses),
            'massage'=> 'Курсы преподавателя получены!'
         ]);
     }
@@ -208,7 +217,7 @@ class CourseController extends AbstractController
         }
 
         return $this->json([
-            'data' => $coursesData,
+            'data' => $this->serializer->normalize($coursesData),
             'massage'=>'Курсы для этого студента получены!',
         ]);
 
@@ -222,7 +231,6 @@ class CourseController extends AbstractController
         $data = json_decode($request->getContent(), true);
         $courseId  = $data['courseId'];
         $userId = $data['userId'];
-        //Добавить получение id пользователя от фронта
         $course = $courseRepository->find($courseId);
 
         if (!$course) {
@@ -241,7 +249,7 @@ class CourseController extends AbstractController
 
         //возвращаем ответ в формате json
         return $this->json([
-            'data' => $courseForUser,
+            'data' => $this->serializer->normalize($courseForUser),
             'message' => 'Курс успешно назначен!',
         ]);
     }
