@@ -59,6 +59,14 @@ class UserTeacherController extends AbstractController
         $invent->setTeacherId($usrData['data']['id']);
         $invent->setUserId($data['id']);
         $invent->setAccept(True);
+
+        $existingInvitation = $repo->findOneBy(['teacher_id' => $usrData['data']['id'], 'user_id' => $data['id']]);
+
+        if ($existingInvitation) {
+            return $this->json([
+                'message' => 'Приглашение уже отправлено для этого пользователя',
+            ], 400);
+        }
         $repo->save($invent, True);
 
         //возвращаем ответ в формате json

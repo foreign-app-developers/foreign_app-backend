@@ -23,6 +23,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Serializer\Serializer;
 
+
 /**
  * @Route("/api")
  */

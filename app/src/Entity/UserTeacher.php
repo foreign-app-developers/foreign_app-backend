@@ -11,6 +11,12 @@ use Doctrine\ORM\Mapping as ORM;
 class UserTeacher
 {
     /**
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\Column(type="integer")
+     */
+    private ?int $id = null;
+    /**
      * @ORM\Column(type="integer")
      */
     private $user_id;
@@ -21,7 +27,6 @@ class UserTeacher
     private $accept;
 
     /**
-     * @ORM\Id
      * @ORM\Column(type="integer")
      */
     private $teacher_id;
