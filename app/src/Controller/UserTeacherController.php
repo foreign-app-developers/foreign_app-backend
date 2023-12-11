@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Course;
+use App\Repository\CourseForUserRepository;
 use App\Repository\CourseRepository;
 use App\Repository\UserTeacherRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -78,7 +79,7 @@ class UserTeacherController extends AbstractController
     /**
      * @Route("/getStudents", name="get_students_from_teacher", methods={"GET"})
      */
-    public function getStudents(Request $request, UserTeacherRepository $repo): JsonResponse
+    public function getStudents(Request $request, UserTeacherRepository $repo, CourseForUserRepository $repository): JsonResponse
     {
         // Извлекаем заголовок "Authorization"
         $authorizationHeader = $request->headers->get('Authorization');
@@ -97,24 +98,45 @@ class UserTeacherController extends AbstractController
             'headers' => $headers,
         ]);
         $usrData = json_decode($response->getContent(), true);
-        if (!((in_array('ROLE_TEACHER' , $usrData['data']['roles'])) or (in_array('ROLE_DIRECTOR' , $usrData['data']['roles']))))  {
+        if (!((in_array('ROLE_TEACHER', $usrData['data']['roles'])) or (in_array('ROLE_DIRECTOR', $usrData['data']['roles'])))) {
             return $this->json([
                 'message' => 'Доступ запрещен, требуется роль учителя или директора',
             ], 403);
         }
+        $data = json_decode($request->getContent(), true);
+
+        if ($data) {
+            $course_id = $data['course_id'];
+        }
         $students = $repo->findBy(['teacher_id' => $usrData['data']['id']]);
         $acceptedStudents = [];
         foreach ($students as $student) {
+            if ($data) {
+                $courseForUserEntry = $repository->findOneBy(['user_id' => $student->getUserId(), 'course_id' => $course_id]);
+
+                if (!$courseForUserEntry) {
+                    continue;
+                }
+            }
             if ($student->getAccept()) {
-                $user = new User($student->getUserId(),'student', 'Vovafelinger75@gmail.com');
+
+                $user = new User($student->getUserId(), 'student', 'Vovafelinger75@gmail.com');
                 $acceptedStudents[] = $user;
             }
         }
-        return $this->json([
-            'data'=> $this->serializer->normalize($acceptedStudents),
-            'massage'=> 'Студенты получены!'
-        ]);
+        if ($data) {
+            return $this->json([
+                'data' => $this->serializer->normalize($acceptedStudents),
+                'message' => 'Студенты получены!'
+            ]);
+        } else {
+            return $this->json([
+                'data' => $this->serializer->normalize($acceptedStudents),
+                'message' => 'Все студенты получены!'
+            ]);
+        }
     }
+
 
     /**
      * @Route("/getTeachers", name="get_teachers_from_student", methods={"GET"})

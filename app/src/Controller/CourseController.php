@@ -227,30 +227,26 @@ class CourseController extends AbstractController
     /**
      * @Route("/assign-course", name="assign_course_to_student", methods={"POST"})
      */
-    public function assignCourseToStudent(CourseRepository $courseRepository, UserRepository $userRepository, CourseForUserRepository $courseForUserRepository,Request $request): JsonResponse
+    public function assignCourseToStudent(CourseRepository $courseRepository, CourseForUserRepository $courseForUserRepository,Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        $courseId  = $data['courseId'];
-        $userId = $data['userId'];
-        $course = $courseRepository->find($courseId);
+        $course_id  = $data['course_id'];
+        $user_id = $data['user_id'];
+        $course = $courseRepository->find($course_id);
 
         if (!$course) {
             return new JsonResponse(['message' => 'Курс не найден'], 404);
         }
 
-//        if (!$student) {
-//            return new JsonResponse(['message' => 'Студент не найден'], 404);
-//        }
-
         $courseForUser = new CourseForUser();
         $courseForUser->setCourse($course);
-        $courseForUser->setUserId($userId);
+        $courseForUser->setUserId($user_id);
 
         $courseForUserRepository->save($courseForUser, true);
 
         //возвращаем ответ в формате json
         return $this->json([
-            'data' => $this->serializer->normalize($courseForUser),
+            'data' => $this->serializer->normalize($courseForUser, null, ['groups' => 'course']),
             'message' => 'Курс успешно назначен!',
         ]);
     }
