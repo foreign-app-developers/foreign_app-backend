@@ -29,7 +29,6 @@ class CourseForUser
 
     /**
      * @ORM\ManyToMany(targetEntity=Course::class)
-     * @ORM\JoinColumn(nullable=false)
      */
     private $course;
 
