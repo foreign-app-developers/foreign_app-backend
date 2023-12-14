@@ -41,15 +41,6 @@ class Course
      */
     private ?string $description = null;
 
-    /**
-     * @ORM\OneToMany(targetEntity=CourseForUser::class, mappedBy="course", cascade={"remove"})
-     */
-    private $courseForUsers;
-    public function __construct()
-    {
-        $this->courseForUsers = new ArrayCollection();
-    }
-
     public function getAuthorId(): ?int
     {
         return $this->author_id;
@@ -99,38 +90,6 @@ class Course
     public function setDescription(string $description): self
     {
         $this->description = $description;
-
-        return $this;
-    }
-    /**
-     * @return Collection|CourseForUser[]
-     */
-    public function getCourseForUsers(): Collection
-    {
-        /** @var Collection|CourseForUser[] $collection */
-        $collection = $this->courseForUsers;
-        return $collection;
-    }
-
-
-    public function addCourseForUser(CourseForUser $courseForUser): self
-    {
-        if (!$this->courseForUsers->contains($courseForUser)) {
-            $this->courseForUsers[] = $courseForUser;
-            $courseForUser->setCourse($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCourseForUser(CourseForUser $courseForUser): self
-    {
-        if ($this->courseForUsers->removeElement($courseForUser)) {
-            // set the owning side to null (unless already changed)
-            if ($courseForUser->getCourse() === $this) {
-                $courseForUser->setCourse(null);
-            }
-        }
 
         return $this;
     }
