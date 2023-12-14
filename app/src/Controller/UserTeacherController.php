@@ -170,7 +170,52 @@ class UserTeacherController extends AbstractController
         }
         return $this->json([
             'data'=> $this->serializer->normalize($acceptedteachers),
-            'massage'=> 'Преподаватели получены!'
+            'message'=> 'Преподаватели получены!'
         ]);
+
+    }
+
+    /**
+     * @Route("/untie", name="send untie", methods={"DELETE"})
+     */
+    public function untieTeacherStudent( Request $request, UserTeacherRepository $repo):JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        // Извлекаем заголовок "Authorization"
+        $authorizationHeader = $request->headers->get('Authorization');
+
+        // Проверяем, существует ли заголовок
+        if (!$authorizationHeader) {
+            return $this->json([
+                'message' => 'Заголовок Authorization не предоставлен',
+            ], 401);
+        }
+        $client = HttpClient::create();
+        $headers = [
+            'YT-AUTH-TOKEN' => "YourTar " . $authorizationHeader
+        ];
+        $response = $client->request('GET', 'https://back.yourtar.ru/api/user/?with_project=1', [
+            'headers' => $headers,
+        ]);
+        $usrData = json_decode($response->getContent(), true);
+        if (!((in_array('ROLE_TEACHER' , $usrData['data']['roles'])) or (in_array('ROLE_DIRECTOR' , $usrData['data']['roles']))))  {
+            return $this->json([
+                'message' => 'Доступ запрещен, требуется роль учителя или директора',
+            ], 403);
+        }
+
+        $userTeacher = $repo->find($data['id']);
+
+        if (!$userTeacher instanceof userTeacher) {
+            return $this->json([
+                'message' => 'Связь не найдена',
+            ], 404);
+        }
+        $repo->remove($userTeacher, true);
+        return $this->json([
+            'message' => 'Связь успешно удалена!',
+        ]);
+
+
     }
 }

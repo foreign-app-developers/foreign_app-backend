@@ -47,7 +47,7 @@ class CourseController extends AbstractController
 
         return $this->json([
            'data' => $this->serializer->normalize($courses),
-           'massage' => 'Все курсы успешно получены!',
+           'message' => 'Все курсы успешно получены!',
         ]);
 
     }
@@ -162,7 +162,7 @@ class CourseController extends AbstractController
 
         return $this->json([
             'data'=> $this->serializer->normalize($course),
-            'massage' => 'Курс успешно получен!',
+            'message' => 'Курс успешно получен!',
         ]);
     }
     /**
@@ -173,7 +173,7 @@ class CourseController extends AbstractController
         $courses = $repo->findBy(['author_id' => $id]);
         return $this->json([
            'data'=> $this->serializer->normalize($courses),
-           'massage'=> 'Курсы преподавателя получены!'
+           'message'=> 'Курсы преподавателя получены!'
         ]);
     }
 
@@ -219,7 +219,7 @@ class CourseController extends AbstractController
 
         return $this->json([
             'data' => $this->serializer->normalize($coursesData),
-            'massage'=>'Курсы для этого студента получены!',
+            'message'=>'Курсы для этого студента получены!',
         ]);
 
     }
