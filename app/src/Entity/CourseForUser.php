@@ -28,7 +28,7 @@ class CourseForUser
     private $course_id;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Course::class, inversedBy="courseForUsers")
+     * @ORM\ManyToMany(targetEntity=Course::class)
      * @ORM\JoinColumn(nullable=false)
      */
     private $course;
