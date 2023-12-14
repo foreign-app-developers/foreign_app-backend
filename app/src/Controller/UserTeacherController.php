@@ -204,7 +204,10 @@ class UserTeacherController extends AbstractController
             ], 403);
         }
 
-        $userTeacher = $repo->find($data['id']);
+        $userTeacher = $repo->findOneBy([
+            'user_id' => $data['id'],
+            'teacher_id' => $usrData['data']['id'],
+            ]);
 
         if (!$userTeacher instanceof userTeacher) {
             return $this->json([
