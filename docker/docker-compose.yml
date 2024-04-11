@@ -28,11 +28,13 @@ services:
 
   mysql_foreign:
     container_name: mysql_foreign
-    image: mysql:8
-    restart: on-failure
-    expose:
-      - "3306"
+    image: mysql
+    ports:
+      - "3311:3306"
+    restart: always
     environment:
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: root
       MYSQL_ROOT_PASSWORD: root
     volumes:
-      - ./db:/var/lib/mysql
+      - /var/lib/mysqld:/var/lib/mysql
