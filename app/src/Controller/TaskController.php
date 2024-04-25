@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("/tasks")
+ * @Route("/theory-practise")
  */
 class TaskController extends AbstractController
 {

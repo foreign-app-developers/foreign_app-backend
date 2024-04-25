@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("/materials")
+ * @Route("/theory-practise")
  */
 class MaterialController extends AbstractController
 {

@@ -17,7 +17,7 @@ use App\Entity\User;
 use Symfony\Component\Serializer\SerializerInterface;
 
 /**
- * @Route("/api")
+ * @Route("/theory-practise")
  */
 class UserTeacherController extends AbstractController
 {

@@ -25,7 +25,7 @@ use Symfony\Component\Serializer\Serializer;
 
 
 /**
- * @Route("/api")
+ * @Route("/theory-practise")
  */
 class CourseController extends AbstractController
 {
